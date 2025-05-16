@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #progress { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Upload file</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" required><br><br>
+    <button type="submit">Tải lên</button>
+  </form>
+  <div id="progress"></div>
+  <script>
+    const form = document.getElementById("uploadForm");
+    const progress = document.getElementById("progress");
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const file = form.file.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "upload.php");
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total * 100).toFixed(2);
+          const mb = (e.loaded / 1024 / 1024).toFixed(2);
+          const total = (e.total / 1024 / 1024).toFixed(2);
+          progress.innerText = `Đang upload: ${percent}% (${mb} MB / ${total} MB)`;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          progress.innerHTML = `<b>✅ Thành công:</b> ${xhr.responseText}`;
+        } else {
+          progress.innerHTML = `<b>❌ Upload thất bại:</b> ${xhr.responseText}`;
+        }
+      };
+
+      xhr.send(formData);
+    };
+  </script>
+</body>
+</html>
